@@ -1,0 +1,106 @@
+#!/usr/bin/env python
+
+# must install the ldap3 python module
+from ldap3 import Server, Connection, ALL_ATTRIBUTES, ALL
+from subprocess import call, check_output
+from json import loads
+
+ldap_user = "{{ openvpn_ldap_user }}"
+ldap_password = "{{ openvpn_ldap_password }}"
+
+def ldap_connect(search):
+    server = Server(host='{{ openvpn_ldap_url }}', port={{ openvpn_ldap_port }}, use_ssl=True, get_info=ALL)
+    conn = Connection(server, auto_bind=True, return_empty_attributes=False, user=ldap_user, password=ldap_password)
+    usersSearchParameters = { 'search_base': '{{ openvpn_ldap_uri }}',
+            'search_filter': search, 
+            'attributes': ['uid'],
+            }
+    conn.search(**usersSearchParameters)
+    return conn.entries
+
+def ldap_account_list():
+    ldap_enabled_accounts = ldap_connect('(objectClass=person)')
+    ldap_disabled_accounts = ldap_connect('(&(objectClass=person)(nsAccountLock=true))')
+    all_ldap_accounts = []
+    for entry in ldap_enabled_accounts:
+        all_ldap_accounts.append(entry['uid'][0])
+
+    enabled_accounts = []
+    for entry in ldap_enabled_accounts:
+        enabled_accounts.append(entry['uid'][0])
+    
+    disabled_accounts = []
+    for entry in ldap_disabled_accounts:
+        disabled_accounts.append(entry['uid'][0])
+    
+    for account in disabled_accounts:
+        enabled_accounts.remove(account)
+    
+    return disabled_accounts, enabled_accounts, all_ldap_accounts
+
+def try_sacli():
+    try: 
+        check_output(["/usr/local/openvpn_as/scripts/sacli", "--version"])
+    except:
+        print("The openvpn-as CLI tool is not installed")
+        raise
+
+def openvpn_as_users():
+    openvpn_as_users = loads(check_output(["/usr/local/openvpn_as/scripts/sacli", "UserPropGet"]))
+    return openvpn_as_users
+
+def user_add(user):
+    try:
+        call(["/usr/local/openvpn_as/scripts/sacli",
+            "--user", user, "-k", "prop_autologin", "-v", "true", "UserPropPut"])
+    except:
+        print("Unable to add user %s" %(user))
+        raise
+
+def user_disable(user):
+    try:
+        call(["/usr/local/openvpn_as/scripts/sacli",
+            "--user", user, "--key", "prop_deny",
+            "--value", "true",
+            "UserPropPut"])
+        check_output(["/usr/local/openvpn_as/scripts/sacli",
+            "--user", user, "--reason", "user deleted",
+            "--client_reason", "user deleted",
+            "DisconnectUser"])
+    except:
+        print("Unable to disable user %s" %(user))
+
+def user_delete(user):
+    try:
+        call(["/usr/local/openvpn_as/scripts/sacli",
+            "--user", user, "UserPropDelAll"])
+    except:
+        print("Unable to delete user %s" %(user))
+
+def find_new_users(ovpn_as_users, ldap_enabled):
+    ldap_enabled.remove('openvpn')
+    return (list(set(ldap_enabled) - set(ovpn_as_users)))
+
+def find_removed_users(ovpn_as_users, ldap_all):
+    ovpn_as_users.remove('__DEFAULT__')
+    return (list(set(ovpn_as_users) - set(ldap_all)))
+
+def main():
+    ldap_disabled, ldap_enabled, ldap_all = ldap_account_list()
+    try_sacli()
+
+    ovpn_as_users = set(openvpn_as_users())
+    add_users = find_new_users(ovpn_as_users, ldap_enabled)
+    remove_users = find_removed_users(ovpn_as_users, ldap_all)
+
+    for user in add_users:
+        user_add(user)
+
+    for user in ldap_disabled:
+        user_disable(user)
+
+    for user in remove_users:
+        user_disable(user)
+        user_delete(user)
+
+main()

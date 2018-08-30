@@ -1,0 +1,14 @@
+---
+openvpn_user_password: openvpn
+openvpn_certs_db: /usr/local/openvpn_as/etc/db/certs.db
+openvpn_user_prop_db: /usr/local/openvpn_as/etc/db/userprop.db
+openvpn_config_db: /usr/local/openvpn_as/etc/db/config.db
+openvpn_log_db:  /usr/local/openvpn_as/etc/db/log.db
+openvpn_node_type: PRIMARY 
+openvpn_url: ovpn.test.com
+openvpn_db_user: test
+openvpn_db_password: test
+openvpn_db_port: 3306
+openvpn_ldap_password: blah
+openvpn_ldap: false
+openvpn_ldap_port: 636

@@ -1,0 +1,9 @@
+---
+- name: restart nginx container
+  docker_container:
+    name: web
+    restart: true
+- name: restart openvpnas
+  service:
+    name: openvpnas
+    state: restarted
