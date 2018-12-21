@@ -17,7 +17,7 @@
     - libmysqlclient-dev
 
 - name: see if openvpn-AS is installed
-  shell: dpkg-query -l 'openvpn-as'
+  shell: "dpkg-query -l | grep openvpn-as | grep {{openvpn_as_version}}"
   failed_when: false
   ignore_errors: true
   register: dpkg_openvpn_as
@@ -25,7 +25,7 @@
 
 - name: install openvpn-AS
   apt:
-    deb: 'http://swupdate.openvpn.org/as/openvpn-as-2.5.2-Ubuntu16.amd_64.deb'
+    deb: "{{openvpn_installer_url}}"
   when: "'ii' not in dpkg_openvpn_as.stdout"
 
 - name: change openvpn user password
