@@ -32,6 +32,15 @@
   user:
     name: openvpn
     password: "{{openvpn_user_password}}"
+  failed_when: false
+  ignore_errors: true
+
+- name: change openvpn user password
+  user:
+    name: openvpn_as
+    password: "{{openvpn_user_password}}"
+  failed_when: false
+  ignore_errors: true
 
 - name: modify as.conf
   template:

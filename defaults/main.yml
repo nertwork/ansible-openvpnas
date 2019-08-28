@@ -1,7 +1,7 @@
 ---
 openvpn_as_version: 2.5.2
-openvpn_certs_db: /usr/local/openvpn_as/etc/db/certs.db
-openvpn_config_db: /usr/local/openvpn_as/etc/db/config.db
+openvpn_certs_db: sqlite:///~/db/certs.db
+openvpn_config_db: sqlite:///~/db/config.db
 openvpn_db_password: test
 openvpn_db_port: 3306
 openvpn_db_user: test
@@ -9,9 +9,12 @@ openvpn_installer_url: "http://swupdate.openvpn.org/as/openvpn-as-{{openvpn_as_v
 openvpn_ldap: false
 openvpn_ldap_password: blah
 openvpn_ldap_port: 636
-openvpn_log_db:  /usr/local/openvpn_as/etc/db/log.db
+openvpn_log_db:  sqlite:///~/db/log.db
 openvpn_node_type: PRIMARY
 openvpn_os: Ubuntu16
 openvpn_url: ovpn.test.com
 openvpn_user_password: openvpn
-openvpn_user_prop_db: /usr/local/openvpn_as/etc/db/userprop.db
+openvpn_user_prop_db: sqlite:///~/db/userprop.db
+openvpn_local_config_db: sqlite:///~/db/config_local.db
+openvpn_cluster_db: sqlite:///~/db/cluster.db
+openvpn_notification_db: sqlite:///~/db/notification.db
