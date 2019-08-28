@@ -30,6 +30,17 @@ user_prop_db={{ openvpn_user_prop_db }}
 # configuration DB
 config_db={{ openvpn_config_db }}
 
+{% if openvpn_as_version | version_compare('2.7.0', '>') %}
+# configuration DB Local
+config_db_local={{ openvpn_local_config_db }}
+
+# cluster DB
+cluster_db={{ openvpn_cluster_db }}
+
+# notification DB
+notification_db={{ openvpn_notification_db }}
+
+{% endif %}
 # log DB
 log_db={{ openvpn_log_db }}
 
