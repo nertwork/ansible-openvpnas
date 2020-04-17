@@ -30,7 +30,7 @@ user_prop_db={{ openvpn_user_prop_db }}
 # configuration DB
 config_db={{ openvpn_config_db }}
 
-{% if openvpn_as_version | version_compare('2.7.0', '>') %}
+{% if openvpn_as_version is version('2.7.0', '>') %}
 # configuration DB Local
 config_db_local={{ openvpn_local_config_db }}
 
